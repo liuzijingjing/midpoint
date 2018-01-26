@@ -252,50 +252,74 @@ public class FocusProcessor {
 		        // ACTIVATION
 		        
 				LensUtil.partialExecute("focusActivation",
-						() -> processActivationBeforeAssignments(context, now, result),
+						() -> {
+							processActivationBeforeAssignments(context, now, result);
+							if (consistencyChecks) context.checkConsistence();
+						},
 						partialProcessingOptions::getFocusActivation);
 				
 				
 		        // OBJECT TEMPLATE (before assignments)
 		        
 				LensUtil.partialExecute("objectTemplateBeforeAssignments",
-						() -> objectTemplateProcessor.processTemplate(context,
-								ObjectTemplateMappingEvaluationPhaseType.BEFORE_ASSIGNMENTS, now, task, result),
+						() -> {
+							objectTemplateProcessor.processTemplate(context,
+									ObjectTemplateMappingEvaluationPhaseType.BEFORE_ASSIGNMENTS, now, task, result);
+							if (consistencyChecks) context.checkConsistence();
+						},
 						partialProcessingOptions::getObjectTemplateBeforeAssignments);
 		        
 		        
 		        // process activation again. Object template might have changed it.
 		        context.recomputeFocus();
 		        LensUtil.partialExecute("focusActivation",
-						() -> processActivationBeforeAssignments(context, now, result),
+						() -> {
+		        	        processActivationBeforeAssignments(context, now, result);
+							if (consistencyChecks) context.checkConsistence();
+						},
 						partialProcessingOptions::getFocusActivation);
 		        
 		        // ASSIGNMENTS
 		        
 		        LensUtil.partialExecute("assignments",
-						() -> assignmentProcessor.processAssignmentsProjections(context, now, task, result),
+						() -> {
+		        	        assignmentProcessor.processAssignmentsProjections(context, now, task, result);
+							if (consistencyChecks) context.checkConsistence();
+						},
 						partialProcessingOptions::getAssignments);
 
 		        LensUtil.partialExecute("assignmentsOrg",
-						() -> assignmentProcessor.processOrgAssignments(context, result),
+						() -> {
+		        	        assignmentProcessor.processOrgAssignments(context, result);
+							if (consistencyChecks) context.checkConsistence();
+						},
 						partialProcessingOptions::getAssignmentsOrg);
 
 
 		        LensUtil.partialExecute("assignmentsMembershipAndDelegate",
-						() -> assignmentProcessor.processMembershipAndDelegatedRefs(context, result),
+						() -> {
+		        	        assignmentProcessor.processMembershipAndDelegatedRefs(context, result);
+							if (consistencyChecks) context.checkConsistence();
+						},
 						partialProcessingOptions::getAssignmentsMembershipAndDelegate);
 
 		        context.recompute();
 		        
 		        LensUtil.partialExecute("assignmentsConflicts",
-						() -> assignmentProcessor.checkForAssignmentConflicts(context, result),
+						() -> {
+		        	        assignmentProcessor.checkForAssignmentConflicts(context, result);
+							if (consistencyChecks) context.checkConsistence();
+						},
 						partialProcessingOptions::getAssignmentsConflicts);
 		        
 		        // OBJECT TEMPLATE (after assignments)
 
 				LensUtil.partialExecute("objectTemplateAfterAssignments",
-						() -> objectTemplateProcessor.processTemplate(context,
-								ObjectTemplateMappingEvaluationPhaseType.AFTER_ASSIGNMENTS, now, task, result),
+						() -> {
+							objectTemplateProcessor.processTemplate(context,
+									ObjectTemplateMappingEvaluationPhaseType.AFTER_ASSIGNMENTS, now, task, result);
+							if (consistencyChecks) context.checkConsistence();
+						},
 						partialProcessingOptions::getObjectTemplateBeforeAssignments);
 
 		        context.recompute();
@@ -304,20 +328,29 @@ public class FocusProcessor {
 		        // We also need to apply assignment activation if needed
 		        context.recomputeFocus();
 		        LensUtil.partialExecute("focusActivation",
-						() -> processActivationAfterAssignments(context, now, result),
+						() -> {
+		        	        processActivationAfterAssignments(context, now, result);
+							if (consistencyChecks) context.checkConsistence();
+						},
 						partialProcessingOptions::getFocusActivation);
 		        
 		        // CREDENTIALS (including PASSWORD POLICY)
 				
 		        LensUtil.partialExecute("focusCredentials",
-						() -> credentialsProcessor.processFocusCredentials(context, now, task, result),
+						() -> {
+		        	        credentialsProcessor.processFocusCredentials(context, now, task, result);
+							if (consistencyChecks) context.checkConsistence();
+						},
 						partialProcessingOptions::getFocusCredentials);
 		        
 		        // We need to evaluate this as a last step. We need to make sure we have all the
 		        // focus deltas so we can properly trigger the rules.
 
 		        LensUtil.partialExecute("focusPolicyRules",
-						() -> evaluateFocusPolicyRules(context, activityDescription, now, task, result),
+						() -> {
+		        	        evaluateFocusPolicyRules(context, activityDescription, now, task, result);
+							if (consistencyChecks) context.checkConsistence();
+						},
 						partialProcessingOptions::getFocusPolicyRules);
 		        
 		        // Processing done, check for success
