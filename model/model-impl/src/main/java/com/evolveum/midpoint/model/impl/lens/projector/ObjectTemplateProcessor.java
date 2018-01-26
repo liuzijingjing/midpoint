@@ -150,10 +150,12 @@ public class ObjectTemplateProcessor {
 
 		Map<ItemPath,ObjectTemplateItemDefinitionType> itemDefinitionsMap = collectItemDefinitionsFromTemplate(objectTemplate, objectTemplate.toString(), task, result);
 
+		context.checkConsistence();
 		XMLGregorianCalendar nextRecomputeTime = collectTripleFromTemplate(context, objectTemplate, phase, 
 				focusOdo, focusOdo.getNewObject(), outputTripleMap,
 				iteration, iterationToken, now, objectTemplate.toString(), task, result);
-		
+		context.checkConsistence();
+
 		if (LOGGER.isTraceEnabled()) {
 			LOGGER.trace("outputTripleMap before item delta computation:\n{}", DebugUtil.debugDumpMapMultiLine(outputTripleMap));
 		}
@@ -161,6 +163,11 @@ public class ObjectTemplateProcessor {
 		String contextDesc = "object template "+objectTemplate+ " for focus "+focusOdo.getAnyObject();
 		Collection<ItemDelta<?,?>> itemDeltas = computeItemDeltas(outputTripleMap, itemDefinitionsMap, focusOdo.getObjectDelta(), focusOdo.getNewObject(), 
 				focusDefinition, contextDesc);
+
+		if (LOGGER.isTraceEnabled()) {
+			LOGGER.trace("itemDeltas:\n{}", DebugUtil.debugDump(itemDeltas));
+		}
+		context.checkConsistence();
 		
 		focusContext.applyProjectionWaveSecondaryDeltas(itemDeltas);
 				
@@ -540,7 +547,9 @@ public class ObjectTemplateProcessor {
 				continue;
 			}
 			LOGGER.trace("Starting evaluation of mapping '{}' in {}", mappingType.getName(), contextDesc);
+			context.checkConsistence();
 			ObjectDeltaObject<F> updatedFocusOdo = getUpdatedFocusOdo(context, focusOdo, outputTripleMap, mappingType, contextDesc);		// for mapping chaining
+			context.checkConsistence();
 
 			Mapping<V,D> mapping = mappingEvaluator.createFocusMapping(mappingFactory, context, mappingType, objectTemplateType, 
 					updatedFocusOdo, target,
@@ -564,6 +573,7 @@ public class ObjectTemplateProcessor {
 			}
 
 			mappingEvaluator.evaluateMapping(mapping, context, task, result);
+			context.checkConsistence();
 			
 			ItemPath itemPath = mapping.getOutputPath();
             if (itemPath == null) {
