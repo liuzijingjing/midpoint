@@ -145,6 +145,7 @@ public class PrismInternalTestUtil implements PrismContextFactory {
 	public static final ItemPath USER_VALID_FROM_PATH = new ItemPath(USER_ACTIVATION_QNAME, USER_VALID_FROM_QNAME);
 	public static final QName USER_VALID_TO_QNAME = new QName(NS_FOO,"validTo");
 	public static final QName ACTIVATION_TYPE_QNAME = new QName(NS_FOO,"ActivationType");
+	public static final QName EXTENSION_TYPE_QNAME = new QName(NS_FOO,"ExtensionType");
 
 	public static final QName USER_ASSIGNMENT_QNAME = new QName(NS_FOO,"assignment");
 	public static final QName USER_DESCRIPTION_QNAME = new QName(NS_FOO,"description");
@@ -436,7 +437,7 @@ public class PrismInternalTestUtil implements PrismContextFactory {
 	private static void assertUserJackExtension(PrismObject<UserType> user) throws SchemaException {
 
 		PrismContainer<?> extension = user.getExtension();
-		assertContainerDefinition(extension, "extension", DOMUtil.XSD_ANY, 0, 1);
+		assertContainerDefinition(extension, "extension", EXTENSION_TYPE_QNAME, 0, 1);
 		PrismContainerValue<?> extensionValue = extension.getValue();
 		assertTrue("Extension parent", extensionValue.getParent() == extension);
 		assertNull("Extension ID", extensionValue.getId());

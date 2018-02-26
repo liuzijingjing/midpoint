@@ -161,7 +161,7 @@ public class TestSchemaRegistry {
 
 		PrismContainerDefinition extensionDef = userDefinition.findContainerDefinition(UserType.F_EXTENSION);
 		assertNotNull("No 'extension' definition", extensionDef);
-		assertTrue("Extension definition is NOT marked as runtime", extensionDef.isRuntimeSchema());
+		assertFalse("Extension definition is marked as runtime", extensionDef.isRuntimeSchema());
 
 		PrismPropertyDefinition<PolyString> givenNameDef = userDefinition.findPropertyDefinition(UserType.F_GIVEN_NAME);
 		assertNotNull("No givenName definition", givenNameDef);
@@ -198,7 +198,7 @@ public class TestSchemaRegistry {
 
 		PrismContainerDefinition extensionDef = roleDefinition.findContainerDefinition(ObjectType.F_EXTENSION);
 		assertNotNull("No 'extension' definition", extensionDef);
-		assertTrue("Extension definition is NOT marked as runtime", extensionDef.isRuntimeSchema());
+		assertFalse("Extension definition is marked as runtime", extensionDef.isRuntimeSchema());
 
 		PrismPropertyDefinition identifierDef = roleDefinition.findPropertyDefinition(RoleType.F_IDENTIFIER);
 		assertNotNull("No identifier definition", identifierDef);
@@ -227,11 +227,11 @@ public class TestSchemaRegistry {
 
 		PrismContainerDefinition extensionDef = accountDef.findContainerDefinition(ShadowType.F_EXTENSION);
 		assertNotNull("No 'extension' definition", extensionDef);
-		assertTrue("'extension' definition is not marked as runtime", extensionDef.isRuntimeSchema());
+		assertFalse("'extension' definition is marked as runtime", extensionDef.isRuntimeSchema());
 
 		PrismContainerDefinition attributesDef = accountDef.findContainerDefinition(ShadowType.F_ATTRIBUTES);
 		assertNotNull("No 'attributes' definition", attributesDef);
-		assertTrue("'attributes' definition is not marked as runtime", attributesDef.isRuntimeSchema());
+		assertFalse("'attributes' definition is marked as runtime", attributesDef.isRuntimeSchema());
 	}
 
 	private MidPointPrismContextFactory getContextFactory() {

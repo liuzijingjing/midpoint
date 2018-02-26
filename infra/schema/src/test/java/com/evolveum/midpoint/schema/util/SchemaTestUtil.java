@@ -71,7 +71,7 @@ public class SchemaTestUtil {
 
 		PrismContainerDefinition extensionContainer = complexTypeDefinition.findContainerDefinition(UserType.F_EXTENSION);
 		PrismAsserts.assertDefinition(extensionContainer, UserType.F_EXTENSION, ExtensionType.COMPLEX_TYPE, 0, 1);
-		assertTrue("Extension is NOT runtime", extensionContainer.isRuntimeSchema());
+		assertFalse("Extension is runtime", extensionContainer.isRuntimeSchema());
 		assertTrue("Extension is NOT dynamic", extensionContainer.isDynamic());
 		assertEquals("Extension size", 0, extensionContainer.getDefinitions().size());
 		PrismAsserts.assertItemDefinitionDisplayName(complexTypeDefinition, UserType.F_EXTENSION, "ObjectType.extension");

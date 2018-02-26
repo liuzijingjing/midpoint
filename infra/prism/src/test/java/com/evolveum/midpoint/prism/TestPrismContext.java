@@ -174,8 +174,8 @@ public class TestPrismContext {
 		assertFalse("User definition is marked as runtime", userDefinition.isRuntimeSchema());
 
 		PrismContainerDefinition extensionContainer = userDefinition.findContainerDefinition(USER_EXTENSION_QNAME);
-		PrismAsserts.assertDefinition(extensionContainer, USER_EXTENSION_QNAME, DOMUtil.XSD_ANY, 0, 1);
-		assertTrue("Extension is not runtime", extensionContainer.isRuntimeSchema());
+		PrismAsserts.assertDefinition(extensionContainer, USER_EXTENSION_QNAME, EXTENSION_TYPE_QNAME, 0, 1);
+		assertFalse("Extension is runtime", extensionContainer.isRuntimeSchema());
 		assertTrue("Extension is not empty", extensionContainer.getDefinitions().isEmpty());
 		PrismAsserts.assertItemDefinitionDisplayName(userDefinition, USER_EXTENSION_QNAME, "ObjectType.extension");
 		PrismAsserts.assertItemDefinitionDisplayOrder(userDefinition, USER_EXTENSION_QNAME, 1000);
@@ -214,7 +214,7 @@ public class TestPrismContext {
 
 		PrismContainerDefinition attributesContainer = accountDefinition.findContainerDefinition(ACCOUNT_ATTRIBUTES_QNAME);
 		PrismAsserts.assertDefinition(attributesContainer, ACCOUNT_ATTRIBUTES_QNAME, ATTRIBUTES_TYPE_QNAME, 0, 1);
-		assertTrue("Attributes is NOT runtime", attributesContainer.isRuntimeSchema());
+		assertFalse("Attributes container is runtime", attributesContainer.isRuntimeSchema());
 	}
 
 	@Test

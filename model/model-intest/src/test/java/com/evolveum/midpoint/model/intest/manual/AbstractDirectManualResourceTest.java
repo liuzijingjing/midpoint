@@ -1713,7 +1713,7 @@ public abstract class AbstractDirectManualResourceTest extends AbstractManualRes
 	 */
 	@Test
 	public void test525CloseCasesAndRecomputeWill() throws Exception {
-		final String TEST_NAME = "test515CloseCasesAndRecomputeWill";
+		final String TEST_NAME = "test525CloseCasesAndRecomputeWill";
 		displayTestTitle(TEST_NAME);
 		// GIVEN
 		Task task = createTask(TEST_NAME);

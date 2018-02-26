@@ -54,19 +54,19 @@
     <xsd:element name="name" type="t:PolyStringType"/>
     <xsd:element name="displayName" type="xsd:string"/>
     <xsd:element name="description" type="xsd:string"/>
-    <xsd:element name="extension">
-        <xsd:annotation>
-            <xsd:appinfo>
-                <a:container/>
-            </xsd:appinfo>
-        </xsd:annotation>
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:any namespace="##any" minOccurs="0" maxOccurs="unbounded" processContents="lax">
-                </xsd:any>
-            </xsd:sequence>
-        </xsd:complexType>
-    </xsd:element>
+    <xsd:element name="extension" type="tns:ExtensionType"/>
+
+	<xsd:complexType name="ExtensionType">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<a:container/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:any namespace="##any" minOccurs="0" maxOccurs="unbounded" processContents="lax">
+			</xsd:any>
+		</xsd:sequence>
+	</xsd:complexType>
 
     <!-- Basic Object Types -->
 

@@ -567,4 +567,6 @@ public abstract class SchemaConstants {
 
 	// a bit of hack
 	public static final String COMPLETED_TASK_CLEANUP_TRIGGER_HANDLER_URI = SchemaConstants.NS_MODEL + "/completedTaskCleanup/handler-3";
+
+	public static final ItemPath PATH_EXTENSION = new ItemPath(ObjectType.F_EXTENSION);
 }

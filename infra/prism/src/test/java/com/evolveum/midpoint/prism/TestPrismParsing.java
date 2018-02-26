@@ -420,7 +420,7 @@ public abstract class TestPrismParsing {
 	private void assertUserExtensionAdhoc(PrismObject<UserType> user) {
 
 		PrismContainer<?> extension = user.getExtension();
-		assertContainerDefinition(extension, "extension", DOMUtil.XSD_ANY, 0, 1);
+		assertContainerDefinition(extension, "extension", EXTENSION_TYPE_QNAME, 0, 1);
 		PrismContainerValue<?> extensionValue = extension.getValue();
 		assertTrue("Extension parent", extensionValue.getParent() == extension);
 		assertNull("Extension ID", extensionValue.getId());
@@ -447,7 +447,7 @@ public abstract class TestPrismParsing {
 	private void assertUserWillExtension(PrismObject<UserType> user) {
 
 		PrismContainer<?> extension = user.getExtension();
-		assertContainerDefinition(extension, "extension", DOMUtil.XSD_ANY, 0, 1);
+		assertContainerDefinition(extension, "extension", EXTENSION_TYPE_QNAME, 0, 1);
 		PrismContainerValue<?> extensionValue = extension.getValue();
 		assertTrue("Extension parent", extensionValue.getParent() == extension);
 		assertNull("Extension ID", extensionValue.getId());
@@ -548,7 +548,7 @@ public abstract class TestPrismParsing {
 	private void assertUserElisabethExtension(PrismObject<UserType> user) {
 
 		PrismContainer<?> extension = user.getExtension();
-		assertContainerDefinition(extension, "extension", DOMUtil.XSD_ANY, 0, 1);
+		assertContainerDefinition(extension, "extension", EXTENSION_TYPE_QNAME, 0, 1);
 		PrismContainerValue<?> extensionValue = extension.getValue();
 		assertTrue("Extension parent", extensionValue.getParent() == extension);
 		assertNull("Extension ID", extensionValue.getId());

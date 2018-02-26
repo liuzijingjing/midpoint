@@ -80,7 +80,7 @@ public abstract class ObjectType
     private final static long serialVersionUID = 201202081233L;
     protected PolyStringType name;
     protected String description;
-    protected Extension extension;
+    protected ExtensionType extension;
     @XmlAttribute(name = "oid")
     protected String oid;
     @XmlAttribute(name = "version")
@@ -140,10 +140,10 @@ public abstract class ObjectType
      *
      * @return
      *     possible object is
-     *     {@link Extension }
+     *     {@link ExtensionType }
      *
      */
-    public Extension getExtension() {
+    public ExtensionType getExtension() {
         return extension;
     }
 
@@ -152,10 +152,10 @@ public abstract class ObjectType
      *
      * @param value
      *     allowed object is
-     *     {@link Extension }
+     *     {@link ExtensionType }
      *
      */
-    public void setExtension(Extension value) {
+    public void setExtension(ExtensionType value) {
         this.extension = value;
     }
 

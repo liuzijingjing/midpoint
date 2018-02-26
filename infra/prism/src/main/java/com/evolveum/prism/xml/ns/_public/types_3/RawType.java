@@ -2,6 +2,7 @@ package com.evolveum.prism.xml.ns._public.types_3;
 
 import com.evolveum.midpoint.prism.*;
 import com.evolveum.midpoint.prism.path.ItemPath;
+import com.evolveum.midpoint.prism.xml.XmlTypeConverter;
 import com.evolveum.midpoint.prism.xnode.PrimitiveXNode;
 import com.evolveum.midpoint.prism.xnode.RootXNode;
 import com.evolveum.midpoint.prism.xnode.XNode;
@@ -9,7 +10,6 @@ import com.evolveum.midpoint.util.ShortDumpable;
 import com.evolveum.midpoint.util.exception.SchemaException;
 import com.evolveum.midpoint.util.exception.SystemException;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,6 +19,7 @@ import org.jvnet.jaxb2_commons.locator.ObjectLocator;
 
 import javax.xml.namespace.QName;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -70,11 +71,20 @@ public class RawType implements Serializable, Cloneable, Equals, Revivable, Shor
 		this.parsed = parsed;
 		if (explicitTypeName != null) {
 			this.explicitTypeName = explicitTypeName;
-			this.explicitTypeDeclaration = true;        // todo
+			this.explicitTypeDeclaration = isStaticallyDefined(this.explicitTypeName, prismContext);
 		} else if (parsed != null && parsed.getTypeName() != null) {
 			this.explicitTypeName = parsed.getTypeName();
-			this.explicitTypeDeclaration = true;        // todo
+			this.explicitTypeDeclaration = isStaticallyDefined(this.explicitTypeName, prismContext);
 		}
+	}
+
+	private boolean isStaticallyDefined(@NotNull QName typeName, PrismContext prismContext) {
+    	if (XmlTypeConverter.canConvert(typeName)) {
+    		return true;
+	    } else {
+		    Collection<? extends TypeDefinition> definitions = prismContext.getSchemaRegistry().findTypeDefinitionsByType(typeName);
+		    return !definitions.isEmpty() && definitions.stream().noneMatch(Definition::isRuntimeSchema);
+	    }
 	}
 
 	@Override
@@ -136,7 +146,7 @@ public class RawType implements Serializable, Cloneable, Equals, Revivable, Shor
 				xnode = null;
 				parsed = value;
 				explicitTypeName = itemDefinition.getTypeName();
-				explicitTypeDeclaration = true; // todo
+				explicitTypeDeclaration = isStaticallyDefined(explicitTypeName, prismContext);
 				return (IV) parsed;
 			} else {
 				// we don't really want to set 'parsed', as we didn't performed real parsing

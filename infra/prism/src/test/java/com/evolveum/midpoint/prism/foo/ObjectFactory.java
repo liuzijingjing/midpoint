@@ -72,11 +72,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Extension }
+     * Create an instance of {@link ExtensionType }
      *
      */
-    public Extension createExtension() {
-        return new Extension();
+    public ExtensionType createExtension() {
+        return new ExtensionType();
     }
 
     /**

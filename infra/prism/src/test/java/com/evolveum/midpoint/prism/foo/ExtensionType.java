@@ -48,11 +48,11 @@ import org.w3c.dom.Element;
  *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
+@XmlType(name = "ExtensionType", propOrder = {
     "any"
 })
 @XmlRootElement(name = "extension")
-public class Extension
+public class ExtensionType
     implements Serializable
 {
 

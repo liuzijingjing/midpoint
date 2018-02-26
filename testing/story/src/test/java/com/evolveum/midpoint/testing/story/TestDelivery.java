@@ -19,6 +19,7 @@ package com.evolveum.midpoint.testing.story;
 import com.evolveum.midpoint.model.api.WorkflowService;
 import com.evolveum.midpoint.prism.PrismContext;
 import com.evolveum.midpoint.prism.PrismObject;
+import com.evolveum.midpoint.prism.path.ItemPath;
 import com.evolveum.midpoint.schema.result.OperationResult;
 import com.evolveum.midpoint.schema.util.WfContextUtil;
 import com.evolveum.midpoint.task.api.Task;
@@ -32,6 +33,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
+import javax.xml.namespace.QName;
 import java.io.File;
 import java.util.Arrays;
 
@@ -56,6 +58,8 @@ public class TestDelivery extends AbstractStoryTest {
 	private static final String USERS_DIR = TEST_DIR + "/users";
 
 	public static final String NS_EXT = "http://midpoint.evolveum.com/xml/ns/story/delivery/ext";
+	public static final QName NAME_TPU = new QName(NS_EXT, "tpu");
+	public static final ItemPath PATH_TPU = new ItemPath(UserType.F_EXTENSION, TestDelivery.NAME_TPU);
 
 	private static final File ORG_MONKEY_ISLAND_FILE = new File(ORG_DIR, "0-org-monkey-island-modified.xml");
 

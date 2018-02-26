@@ -155,12 +155,11 @@ public class XsdTypeMapper {
     	Class clazz = xsdToJavaTypeMap.get(xsdType);
     	if (clazz == null){
     		Set<QName> keys = xsdToJavaTypeMap.keySet();
-    		for (Iterator<QName> iterator = keys.iterator(); iterator.hasNext();){
-    			QName key = iterator.next();
-    			if (QNameUtil.match(key, xsdType)){
-    				return xsdToJavaTypeMap.get(key);
-    			}
-    		}
+		    for (QName key : keys) {
+			    if (QNameUtil.match(key, xsdType)) {
+				    return xsdToJavaTypeMap.get(key);
+			    }
+		    }
     	}
     	return xsdToJavaTypeMap.get(xsdType);
     }

@@ -93,7 +93,7 @@ public class JaxbDomHack {
 			return def;
 		}
 
-		if (containerDefinition.isRuntimeSchema()) {
+		if (!containerDefinition.hasStaticallyDefinedContent()) {
 			// Try to locate global definition in any of the schemas
 			def = resolveGlobalItemDefinition(containerDefinition, elementQName);
 		}

@@ -264,7 +264,7 @@ public class TestPrismObjectConstruction {
 		PrismContainer<?> extensionContainer = user.findOrCreateContainer(USER_EXTENSION_QNAME);
 		assertEquals(USER_EXTENSION_QNAME, extensionContainer.getElementName());
 		PrismAsserts.assertParentConsistency(user);
-		if (assertDefinitions) PrismAsserts.assertDefinition(extensionContainer, DOMUtil.XSD_ANY, 0, 1);
+		if (assertDefinitions) PrismAsserts.assertDefinition(extensionContainer, EXTENSION_TYPE_QNAME, 0, 1);
 		PrismContainer<AssignmentType> extensionContainerAgain = user.findOrCreateContainer(USER_EXTENSION_QNAME);
 		// The "==" is there by purpose. We really want to make sure that is the same *instance*, that is was not created again
 		assertTrue("Extension not the same", extensionContainer == extensionContainerAgain);

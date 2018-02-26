@@ -166,7 +166,7 @@ public class TestSchemaSanity {
 
 		PrismContainerDefinition attributesContainer = accountDefinition.findContainerDefinition(ShadowType.F_ATTRIBUTES);
 		PrismAsserts.assertDefinition(attributesContainer, ShadowType.F_ATTRIBUTES, ShadowAttributesType.COMPLEX_TYPE, 0, 1);
-		assertTrue("Attributes is NOT runtime", attributesContainer.isRuntimeSchema());
+		assertFalse("Attributes is runtime", attributesContainer.isRuntimeSchema());
 		assertEquals("Wrong attributes compile-time class", ShadowAttributesType.class, attributesContainer.getCompileTimeClass());
 	}
 
@@ -229,7 +229,7 @@ public class TestSchemaSanity {
 		System.out.println("configurationProperties definition:");
 		System.out.println(configurationPropertiesDefinition.debugDump());
 
-		assertTrue("configurationProperties definition is NOT marked as runtime", configurationPropertiesDefinition.isRuntimeSchema());
+		assertFalse("configurationProperties definition is marked as runtime", configurationPropertiesDefinition.isRuntimeSchema());
 //		assertNull("Unexpected compile-time class in configurationProperties definition", configurationPropertiesDefinition.getCompileTimeClass());
 
 //		assertTrue("configurationProperties definition is NOT marked as wildcard", configurationPropertiesDefinition.isWildcard());
@@ -307,8 +307,8 @@ public class TestSchemaSanity {
 
 		PrismContainerDefinition configurationPropertiesContainerDef = icfSchema.findContainerDefinitionByElementName(ICFC_CONFIGURATION_PROPERTIES);
 		PrismAsserts.assertDefinition(configurationPropertiesContainerDef, ICFC_CONFIGURATION_PROPERTIES, ICFC_CONFIGURATION_PROPERTIES_TYPE, 0, 1);
-		assertTrue("configurationPropertiesContainer definition is NOT marked as runtime", configurationPropertiesContainerDef.isRuntimeSchema());
-		assertTrue("configurationPropertiesContainer definition is NOT marked as dynamic", configurationPropertiesContainerDef.isDynamic());
+		assertFalse("configurationPropertiesContainer definition is marked as runtime", configurationPropertiesContainerDef.isRuntimeSchema());
+		//assertTrue("configurationPropertiesContainer definition is NOT marked as dynamic", configurationPropertiesContainerDef.isDynamic());
 
 	}
 

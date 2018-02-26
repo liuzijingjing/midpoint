@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.evolveum.midpoint.prism.*;
+import com.evolveum.midpoint.xml.ns._public.common.common_3.*;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,12 +45,9 @@ import com.evolveum.midpoint.audit.api.AuditEventType;
 import com.evolveum.midpoint.model.api.WorkflowService;
 import com.evolveum.midpoint.model.test.DummyTransport;
 import com.evolveum.midpoint.notifications.api.transports.Message;
-import com.evolveum.midpoint.prism.PrismContext;
-import com.evolveum.midpoint.prism.PrismObject;
 import com.evolveum.midpoint.prism.delta.ItemDelta;
 import com.evolveum.midpoint.prism.delta.ObjectDelta;
 import com.evolveum.midpoint.prism.delta.builder.DeltaBuilder;
-import com.evolveum.midpoint.prism.path.ItemPath;
 import com.evolveum.midpoint.prism.util.PrismAsserts;
 import com.evolveum.midpoint.prism.xml.XmlTypeConverter;
 import com.evolveum.midpoint.schema.ObjectDeltaOperation;
@@ -64,23 +63,8 @@ import com.evolveum.midpoint.util.exception.ObjectNotFoundException;
 import com.evolveum.midpoint.util.exception.SchemaException;
 import com.evolveum.midpoint.wf.api.WorkflowConstants;
 import com.evolveum.midpoint.wf.util.ApprovalUtils;
-import com.evolveum.midpoint.xml.ns._public.common.common_3.ApprovalSchemaType;
-import com.evolveum.midpoint.xml.ns._public.common.common_3.ApprovalStageDefinitionType;
-import com.evolveum.midpoint.xml.ns._public.common.common_3.CaseEventType;
-import com.evolveum.midpoint.xml.ns._public.common.common_3.ItemApprovalProcessStateType;
-import com.evolveum.midpoint.xml.ns._public.common.common_3.LevelEvaluationStrategyType;
-import com.evolveum.midpoint.xml.ns._public.common.common_3.ObjectType;
-import com.evolveum.midpoint.xml.ns._public.common.common_3.OrgType;
-import com.evolveum.midpoint.xml.ns._public.common.common_3.RoleType;
-import com.evolveum.midpoint.xml.ns._public.common.common_3.TaskType;
-import com.evolveum.midpoint.xml.ns._public.common.common_3.UserType;
-import com.evolveum.midpoint.xml.ns._public.common.common_3.WfContextType;
-import com.evolveum.midpoint.xml.ns._public.common.common_3.WorkItemCompletionEventType;
-import com.evolveum.midpoint.xml.ns._public.common.common_3.WorkItemDelegationMethodType;
-import com.evolveum.midpoint.xml.ns._public.common.common_3.WorkItemEscalationEventType;
-import com.evolveum.midpoint.xml.ns._public.common.common_3.WorkItemEventType;
-import com.evolveum.midpoint.xml.ns._public.common.common_3.WorkItemOutcomeType;
-import com.evolveum.midpoint.xml.ns._public.common.common_3.WorkItemType;
+
+import javax.xml.namespace.QName;
 
 /**
  *
@@ -1106,8 +1090,17 @@ public class TestStrings extends AbstractStoryTest {
 		// WHEN
 		PrismObject<UserType> cheese = getUserFromRepo(userCheeseOid);
 		login(cheese);
-		ObjectDelta formDelta = DeltaBuilder.deltaFor(UserType.class, prismContext)
-				.item(UserType.F_DESCRIPTION).replace("Hello")
+
+		PrismContainerDefinition<?> extDef = prismContext.getSchemaRegistry()
+				.findItemDefinitionByFullPath(UserType.class, PrismContainerDefinition.class, UserType.F_EXTENSION);
+		PrismContainerValue<?> extPcv = extDef.instantiate().createNewValue().clone();
+		//noinspection unchecked
+		PrismPropertyDefinition<String> tpuDef = extDef.findItemDefinition(new QName("tpu"), PrismPropertyDefinition.class);
+		PrismProperty<String> tpuProp = tpuDef.instantiate();
+		tpuProp.setRealValue("123");
+		extPcv.add(tpuProp);
+		ObjectDelta formDelta = DeltaBuilder.deltaFor(UserType.class, prismContext)     // MID-4455, MID-4465
+				.item(UserType.F_EXTENSION).replace(extPcv)
 				.asObjectDelta(userBobOid);
 		workflowService.completeWorkItem(workItem.getExternalId(), true, "OK. LeChuck", formDelta, result);
 
@@ -1142,17 +1135,22 @@ public class TestStrings extends AbstractStoryTest {
 		ObjectDeltaOperation<? extends ObjectType> delta = deltas.iterator().next();
 		assertEquals("Wrong # of modifications in audit record delta", 1, delta.getObjectDelta().getModifications().size());
 		ItemDelta<?, ?> itemDelta = delta.getObjectDelta().getModifications().iterator().next();
-		if (!new ItemPath(UserType.F_DESCRIPTION).equivalent(itemDelta.getPath())) {
-			fail("Wrong item path in delta: expected: "+new ItemPath(UserType.F_DESCRIPTION)+", found: "+itemDelta.getPath());
+
+		if (!SchemaConstants.PATH_EXTENSION.equivalent(itemDelta.getPath())) {
+			fail("Wrong item path in delta: expected: "+SchemaConstants.PATH_EXTENSION+", found: "+itemDelta.getPath());
 		}
-		assertEquals("Wrong value in delta", "Hello", itemDelta.getValuesToReplace().iterator().next().getRealValue());
+		assertEquals("Wrong value in delta", extPcv, itemDelta.getValuesToReplace().iterator().next());
 
 		// record #1, #2: cancellation of work items of other approvers
 		// record #3: finishing process execution
 
 		Task rootTask = taskManager.getTaskByIdentifier(wfTask.asObjectable().getParent(), result);
 		waitForTaskCloseOrSuspend(rootTask.getOid(), TASK_WAIT_TIMEOUT);
-		assertAssignedRole(getUser(userBobOid), roleATest4Oid);
+		PrismObject<UserType> bobAfter = getUser(userBobOid);
+		assertAssignedRole(bobAfter, roleATest4Oid);
+		Item<?, ?> tpuItem = bobAfter.findItem(TestDelivery.PATH_TPU);
+		assertNotNull("extension/tpu was not set", tpuItem);
+		assertEquals("Wrong value of extension/tpu", "123", tpuItem.getRealValue());
 	}
 
 	@Test

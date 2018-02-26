@@ -313,7 +313,6 @@ public class TestTriggerTask extends AbstractInitializedModelIntegrationTest {
 
 		XMLGregorianCalendar lastScanTimestampAfter = getLastScanTimestamp(TASK_TRIGGER_SCANNER_OID);
 
-		// this assert may fail occasionally if the trigger scanner would start in between (we'll see how often)
 		assertEquals("Last scan timestamp was changed", lastScanTimestampBefore, lastScanTimestampAfter);
 	}
 

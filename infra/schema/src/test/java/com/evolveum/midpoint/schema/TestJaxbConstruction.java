@@ -15,11 +15,8 @@
  */
 package com.evolveum.midpoint.schema;
 
-import static org.testng.AssertJUnit.assertNull;
-import static org.testng.AssertJUnit.assertTrue;
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertNotNull;
 import static com.evolveum.midpoint.schema.TestConstants.*;
+import static org.testng.AssertJUnit.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -118,7 +115,7 @@ public class TestJaxbConstruction {
 
 		user.checkConsistence();
 
-		PrismContainer<Containerable> extensionContainer = user.findContainer(GenericObjectType.F_EXTENSION);
+		PrismContainer<Containerable> extensionContainer = user.findContainer(UserType.F_EXTENSION);
 		checkExtension(extensionContainer,"user extension after setExtension");
 		checkExtension(extension,"user extension after setExtension");
 
@@ -329,7 +326,7 @@ public class TestJaxbConstruction {
 				UserType.F_ASSIGNMENT, AssignmentType.COMPLEX_TYPE, 0, -1);
 		PrismAsserts.assertDefinition(assignmentExtensionValueFromJaxb.getParent().getDefinition(),
 				AssignmentType.F_EXTENSION, ExtensionType.COMPLEX_TYPE, 0, 1);
-		assertTrue("assignment extension definition is not runtime", assignmentExtensionValueFromJaxb.getParent().getDefinition().isRuntimeSchema());
+		assertFalse("assignment extension definition is not runtime", assignmentExtensionValueFromJaxb.getParent().getDefinition().isRuntimeSchema());
 		assertTrue("assignment extension definition is not dynamic", assignmentExtensionValueFromJaxb.getParent().getDefinition().isDynamic());
 		PrismAsserts.assertDefinition(intProperty.getDefinition(), EXTENSION_INT_TYPE_ELEMENT, DOMUtil.XSD_INT, 0, -1);
 		PrismAsserts.assertDefinition(stringProperty.getDefinition(), EXTENSION_STRING_TYPE_ELEMENT, DOMUtil.XSD_STRING, 0, -1);
@@ -509,14 +506,14 @@ public class TestJaxbConstruction {
 	private void checkExtension(PrismContainer<Containerable> extensionContainer, String sourceDescription) {
 		assertNotNull("No extension container in "+sourceDescription+" (prism)", extensionContainer);
 		assertNotNull("No extension definition in "+sourceDescription+" (prism)", extensionContainer.getDefinition());
-		assertTrue("Not runtime in definition in "+sourceDescription+" (prism)", extensionContainer.getDefinition().isRuntimeSchema());
+		assertFalse("Runtime in definition in "+sourceDescription+" (prism)", extensionContainer.getDefinition().isRuntimeSchema());
 	}
 
 	private void checkExtension(ExtensionType extension, String sourceDescription) throws SchemaException {
 		PrismContainerValue<ExtensionType> extensionValueFromJaxb = extension.asPrismContainerValue();
 		assertNotNull("No extension container in "+sourceDescription+" (jaxb)", extensionValueFromJaxb);
 		assertNotNull("No extension definition in "+sourceDescription+" (jaxb)", extensionValueFromJaxb.getParent().getDefinition());
-		assertTrue("Not runtime in definition in "+sourceDescription+" (jaxb)", extensionValueFromJaxb.getParent().getDefinition().isRuntimeSchema());
+		assertFalse("Runtime in definition in "+sourceDescription+" (jaxb)", extensionValueFromJaxb.getParent().getDefinition().isRuntimeSchema());
 
 		PrismProperty<Integer> intProperty = extensionValueFromJaxb.findOrCreateProperty(EXTENSION_INT_TYPE_ELEMENT);
 		PrismAsserts.assertDefinition(intProperty.getDefinition(), EXTENSION_INT_TYPE_ELEMENT, DOMUtil.XSD_INT, 0, -1);

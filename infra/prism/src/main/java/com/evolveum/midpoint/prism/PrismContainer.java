@@ -695,7 +695,7 @@ public class PrismContainer<C extends Containerable> extends Item<PrismContainer
 			boolean prohibitRaw, ConsistencyCheckScope scope) {
         checkIds();
         if (scope.isThorough()) {
-            // Containers that are from run-time schema cannot have compile-time class.
+            // Containers that are from static schema must have compile-time class.
             if (getDefinition() != null && !getDefinition().isRuntimeSchema()) {
                 if (getCompileTimeClass() == null) {
                     throw new IllegalStateException("No compile-time class in "+this+" ("+getPath()+" in "+rootItem+")");

@@ -17,6 +17,7 @@
 package com.evolveum.midpoint.schema;
 
 import static com.evolveum.midpoint.prism.util.PrismTestUtil.getPrismContext;
+import static com.evolveum.midpoint.prism.util.PrismTestUtil.getSchemaRegistry;
 import static com.evolveum.midpoint.schema.DeltaConvertor.toObjectDeltaType;
 import static org.testng.AssertJUnit.assertNull;
 import static org.testng.AssertJUnit.assertFalse;
@@ -82,9 +83,9 @@ public class TestDeltaConverter extends AbstractSchemaTest {
     	assertNotNull("No object delta", objectDelta);
     	objectDelta.checkConsistence();
     	assertEquals("Wrong OID", "c0c010c0-d34d-b33f-f00d-111111111111", objectDelta.getOid());
-    	ReferenceDelta accoutRefDelta = objectDelta.findReferenceModification(UserType.F_LINK_REF);
-    	assertNotNull("No accountRef delta", accoutRefDelta);
-    	Collection<PrismReferenceValue> valuesToAdd = accoutRefDelta.getValuesToAdd();
+    	ReferenceDelta accountRefDelta = objectDelta.findReferenceModification(UserType.F_LINK_REF);
+    	assertNotNull("No accountRef delta", accountRefDelta);
+    	Collection<PrismReferenceValue> valuesToAdd = accountRefDelta.getValuesToAdd();
     	assertEquals("Wrong number of values to add", 1, valuesToAdd.size());
     	PrismReferenceValue accountRefVal = valuesToAdd.iterator().next();
     	assertNotNull("No object in accountRef value", accountRefVal.getObject());
@@ -534,6 +535,53 @@ public class TestDeltaConverter extends AbstractSchemaTest {
 		ObjectDelta<?> delta = DeltaBuilder.deltaFor(UserType.class, getPrismContext())
 				.item(UserType.F_NAME).replace(PolyString.fromOrig("jack"))
 				.asObjectDelta("123456");
+		roundTrip(delta);
+	}
+
+	// MID-4465
+	@Test
+	public void test130AddUserExtension() throws Exception {
+		System.out.println("===[ test130AddUserExtension ]====");
+
+		PrismObjectDefinition<OrgType> orgDef = getSchemaRegistry().findObjectDefinitionByCompileTimeClass(OrgType.class);
+		PrismContainerDefinition<?> orgExtDef = orgDef.getExtensionDefinition();
+		QName orgExtTypeName = orgExtDef.getComplexTypeDefinition().getTypeName();
+		assertEquals("OrgExtensionType", orgExtTypeName.getLocalPart());
+
+		PrismContainerValue<?> pcv = orgExtDef.instantiate().createNewValue();
+		//noinspection unchecked
+		Item<PrismPropertyValue<String>, ?> managerId = orgExtDef.findItemDefinition(new QName("managerId")).instantiate();
+		managerId.add(new PrismPropertyValue<>("456"));
+		pcv.add(managerId);
+
+		ObjectDelta<?> delta = DeltaBuilder.deltaFor(OrgType.class, getPrismContext())
+				.item(OrgType.F_EXTENSION).add(pcv.clone())
+				.asObjectDelta("123456");
+		roundTrip(delta);
+	}
+
+	// MID-4465
+	@Test
+	public void test140AddUserExtensionGenericType() throws Exception {
+		System.out.println("===[ test140AddUserExtensionGenericType ]====");
+
+		PrismContainerDefinition<ExtensionType> extDef = getSchemaRegistry()
+				.findContainerDefinitionByCompileTimeClass(ExtensionType.class);
+		System.out.println("c:extension isRuntime: " + extDef.isRuntimeSchema());
+		System.out.println("c:ExtensionType isRuntime: " + extDef.getComplexTypeDefinition().isRuntimeSchema());
+		PrismContainerDefinition<?> orgExtDef = getSchemaRegistry()
+				.findObjectDefinitionByCompileTimeClass(OrgType.class)
+				.getExtensionDefinition();
+		//noinspection unchecked
+		Item<PrismPropertyValue<String>, ?> managerId = orgExtDef.findItemDefinition(new QName("managerId")).instantiate();
+
+		PrismContainerValue<ExtensionType> pcv = extDef.instantiate().createNewValue();
+		managerId.add(new PrismPropertyValue<>("456"));
+		pcv.add(managerId);
+
+		ContainerDelta<ExtensionType> modification = new ContainerDelta<>(extDef, getPrismContext());
+		modification.addValueToAdd(pcv.clone());
+		ObjectDelta<?> delta = ObjectDelta.createModifyDelta("123456", modification, OrgType.class, getPrismContext());
 		roundTrip(delta);
 	}
 

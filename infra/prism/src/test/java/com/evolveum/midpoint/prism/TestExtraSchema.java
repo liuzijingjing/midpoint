@@ -170,7 +170,7 @@ public class TestExtraSchema {
 		System.out.println("User extension");
 		System.out.println(extDef.debugDump());
 
-		assertTrue("Extension is not dynamic", extDef.isRuntimeSchema());
+		assertFalse("Extension is runtime", extDef.isRuntimeSchema());
 		assertTrue("Wrong extension type "+extDef.getTypeName(),
 				USER_EXTENSION_TYPE_QNAME.equals(extDef.getTypeName()) || USER_2_EXTENSION_TYPE_QNAME.equals(extDef.getTypeName()));
 		assertEquals("Wrong extension displayOrder", (Integer)1000, extDef.getDisplayOrder());

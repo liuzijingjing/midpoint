@@ -82,11 +82,11 @@ public class PrismContainerDefinitionImpl<C extends Containerable> extends ItemD
         super(name, determineTypeName(complexTypeDefinition), prismContext);
         this.complexTypeDefinition = complexTypeDefinition;
         if (complexTypeDefinition == null) {
-            isRuntimeSchema = true;
-            super.setDynamic(true);
+            //isRuntimeSchema = true;
+            super.setDynamic(true);     // TODO
         } else {
-            isRuntimeSchema = complexTypeDefinition.isXsdAnyMarker();
-            super.setDynamic(isRuntimeSchema);
+            //isRuntimeSchema = complexTypeDefinition.isXsdAnyMarker();
+            super.setDynamic(isRuntimeSchema);      // TODO
         }
 		this.compileTimeClass = compileTimeClass;
     }
@@ -500,7 +500,7 @@ public class PrismContainerDefinitionImpl<C extends Containerable> extends ItemD
         DebugUtil.indentDebugDump(sb, indent);
         sb.append(toString());
         if (isRuntimeSchema()) {
-            sb.append(" dynamic");
+            sb.append(" runtime");
         }
         if (seen.containsKey(this) || complexTypeDefinition != null && seen.containsKey(complexTypeDefinition)) {
         	sb.append(" (already shown)");

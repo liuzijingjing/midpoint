@@ -78,7 +78,7 @@ public class PrismMarshaller {
 
 		XNode content = marshalItemContent(item, realItemDefinition, context);
 		if (realItemDefinition != null) {
-			addTypeDefinitionIfNeeded(realItemName, realItemDefinition.getTypeName(), content);
+			setExplicitTypeDeclarationIfNeeded(content, realItemName, realItemDefinition.getTypeName());
 		}
 		return new RootXNode(realItemName, content);
 	}
@@ -105,7 +105,7 @@ public class PrismMarshaller {
 		}
 
 		XNode valueNode = marshalItemValue(value, realItemDefinition, realItemTypeName, context);
-		addTypeDefinitionIfNeeded(realItemName, realItemTypeName, valueNode);
+		setExplicitTypeDeclarationIfNeeded(valueNode, realItemName, realItemTypeName);
 		return new RootXNode(realItemName, valueNode);
 	}
 
@@ -130,7 +130,7 @@ public class PrismMarshaller {
 			XNode valueNode = beanMarshaller.marshall(object, context);        // TODO item definition!
 			QName typeName = JAXBUtil.getTypeQName(object.getClass());
 			if (valueNode != null) {
-				addTypeDefinitionIfNeeded(itemName, typeName, valueNode);
+				setExplicitTypeDeclarationIfNeeded(valueNode, itemName, typeName);
 				if (valueNode.getTypeQName() == null && typeName == null) {
 					throw new SchemaException("No type QName for class " + object.getClass());
 				}
@@ -204,7 +204,7 @@ public class PrismMarshaller {
         } else {
             throw new IllegalArgumentException("Unsupported value type "+itemValue.getClass());
         }
-        if (definition != null && definition.isDynamic() && isInstantiable(definition)) {
+        if (shouldSetTypeAsExplicit(definition)) {
 			if (xnode.getTypeQName() == null) {
 				xnode.setTypeQName(definition.getTypeName());
 			}
@@ -213,25 +213,35 @@ public class PrismMarshaller {
         return xnode;
     }
 
-    // TODO FIXME first of all, Extension definition should not be marked as dynamic
-	private boolean isInstantiable(ItemDefinition definition) {
-		if (definition.isAbstract()) {
+	// TODO MID-4482
+    private boolean shouldSetTypeAsExplicit(ItemDefinition definition) {
+		if (definition == null || !definition.isDynamic() || definition.isAbstract()) {
 			return false;
+		} else if (definition instanceof PrismContainerDefinition || definition instanceof PrismPropertyDefinition) {
+			return typeIsInstantiableAndStaticallyDefined(definition);
+		} else {
+			return false;       // reference definition
 		}
+    }
+
+	private boolean typeIsInstantiableAndStaticallyDefined(ItemDefinition definition) {
 		if (definition instanceof PrismContainerDefinition) {
 			PrismContainerDefinition pcd = (PrismContainerDefinition) definition;
 			ComplexTypeDefinition ctd = pcd.getComplexTypeDefinition();
-			return ctd != null && ctd.getCompileTimeClass() != null;
+			return ctd != null && ctd.getCompileTimeClass() != null && !ctd.isRuntimeSchema();
 		} else if (definition instanceof PrismPropertyDefinition) {
 			PrismPropertyDefinition ppd = (PrismPropertyDefinition) definition;
 			if (ppd.isAnyType()) {
 				return false;
 			}
 			// TODO optimize
-			return getSchemaRegistry().determineClassForType(ppd.getTypeName()) != null
-					|| getSchemaRegistry().findTypeDefinitionByType(ppd.getTypeName(), TypeDefinition.class) != null;
+			if (getSchemaRegistry().determineClassForType(ppd.getTypeName()) != null) {
+				return true;
+			}
+			TypeDefinition typeDefinition = getSchemaRegistry().findTypeDefinitionByType(ppd.getTypeName(), TypeDefinition.class);
+			return typeDefinition != null && !typeDefinition.isRuntimeSchema();
 		} else {
-			return false;
+			return false;       // should never occur
 		}
 	}
 
@@ -429,7 +439,7 @@ public class PrismMarshaller {
 					xnode.setExplicitTypeDeclaration(true);
 				}
 			}
-			return xnode;
+			return xnode;       // TODO assure that xnode is not null here
         } else {
             // primitive value
             return createPrimitiveXNode(realValue, typeName);
@@ -483,21 +493,28 @@ public class PrismMarshaller {
 		return beanMarshaller.getPrismContext().getSchemaRegistry();
 	}
 
-	private void addTypeDefinitionIfNeeded(@NotNull QName itemName, QName typeName, @NotNull XNode valueNode) {
-		if (valueNode.getTypeQName() != null && valueNode.isExplicitTypeDeclaration()) {
+	// TODO MID-4482
+	private void setExplicitTypeDeclarationIfNeeded(@NotNull XNode xnode, @NotNull QName itemName, QName typeName) {
+		if (xnode.getTypeQName() != null && xnode.isExplicitTypeDeclaration()) {
 			return; // already set
 		}
 		if (typeName == null) {
 			return;	// nothing to do, anyway
 		}
-		if (!getSchemaRegistry().hasImplicitTypeDefinition(itemName, typeName)
-				&& (XmlTypeConverter.canConvert(typeName)
-						|| getSchemaRegistry().findTypeDefinitionByType(typeName) != null)) {
-			valueNode.setTypeQName(typeName);
-			valueNode.setExplicitTypeDeclaration(true);
+		if (getSchemaRegistry().hasImplicitTypeDefinition(itemName, typeName)) {
+			return;     // not necessary to include type definition
 		}
+		if (!XmlTypeConverter.canConvert(typeName) && isRuntimeSchema(typeName)) {
+			return;     // useless or even misleading at the receiving end
+		}
+		xnode.setTypeQName(typeName);
+		xnode.setExplicitTypeDeclaration(true);
 	}
 
+	private boolean isRuntimeSchema(QName typeName) {
+		TypeDefinition typeDefinition = getSchemaRegistry().findTypeDefinitionByType(typeName);
+		return typeDefinition == null || typeDefinition.isRuntimeSchema();
+	}
 	//endregion
 
 }

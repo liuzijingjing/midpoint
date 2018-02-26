@@ -850,13 +850,13 @@ public class PrismContainerValue<C extends Containerable> extends PrismValue imp
 		if (propertyDefinition == null) {
 			// container has definition, but there is no property definition. This is either runtime schema
 			// or an error
-			if (getParent() != null && getDefinition() != null && !getDefinition().isRuntimeSchema()) {		// TODO clean this up
+			if (getParent() != null && getDefinition() != null && getDefinition().hasStaticallyDefinedContent()) {
 				throw new IllegalArgumentException("No definition for property "+propertyName+" in "+complexTypeDefinition);
 			}
 		}
         PrismProperty<X> property;
         if (propertyDefinition == null) {
-        	property = new PrismProperty<X>(propertyName, prismContext);		// Definitionless
+        	property = new PrismProperty<>(propertyName, prismContext);		// Definitionless
         } else {
         	property = propertyDefinition.instantiate();
         }
@@ -1196,13 +1196,15 @@ public class PrismContainerValue<C extends Containerable> extends PrismValue imp
 				// the second condition is a hack because e.g.
 				// {http://midpoint.evolveum.com/xml/ns/public/connector/icf-1/bundle/com.evolveum.icf.dummy/com.evolveum.icf.dummy.connector.DummyConnector}ConfigurationType
 				// is clearly a runtime schema but it is _not_ marked as such (why?) -- see TestUcfDummy
+				//
+				// TODO reconsider this
 				if (!definitionToUse.isRuntimeSchema() && definitionToUse.getCompileTimeClass() != null) {
 					// this is the case in which we are going to overwrite a specific definition
 					// (e.g. WfPrimaryChangeProcessorStateType) with a generic one (e.g. WfProcessorSpecificStateType)
 					// --> we should either skip this, or fetch the fresh definition from the prism context
 					ComplexTypeDefinition freshCtd = prismContext.getSchemaRegistry().findComplexTypeDefinitionByType(complexTypeDefinition.getTypeName());
 					if (freshCtd != null) {
-						System.out.println("Using " + freshCtd + " instead of " + definitionToUse);
+//						System.out.println("Using " + freshCtd + " instead of " + definitionToUse);
 						definitionToUse = freshCtd;
 					}
 				} else {
@@ -1230,7 +1232,7 @@ public class PrismContainerValue<C extends Containerable> extends PrismValue imp
 	}
 
 	/**
-	 * This method can both return null and throws exception. It returns null in case there is no definition
+	 * This method can both return null or throw an exception. It returns null in case there is no definition
 	 * but it is OK (e.g. runtime schema). It throws exception if there is no definition and it is not OK.
 	 */
 	@SuppressWarnings("unchecked")
@@ -1239,7 +1241,7 @@ public class PrismContainerValue<C extends Containerable> extends PrismValue imp
 		if (itemDefinition != null) {
 			return itemDefinition;
 		}
-		if (ctd == null || ctd.isXsdAnyMarker() || ctd.isRuntimeSchema()) {
+		if (ctd == null || ctd.isXsdAnyMarker() || ctd.isRuntimeSchema()) {     // TODO the third condition is a bit questionable
 			// If we have prism context, try to locate global definition. But even if that is not
 			// found it is still OK. This is runtime container. We tolerate quite a lot here.
 			PrismContext prismContext = getPrismContext();

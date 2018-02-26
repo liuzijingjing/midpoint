@@ -412,8 +412,8 @@ class DomToSchemaPostProcessor {
 					PrismContainerDefinition<?> containerDefinition = createPropertyContainerDefinition(
 							xsType, p, complexTypeDefinition, containerAnnotation, false);
 					if (isAny(xsType)) {
-						((PrismContainerDefinitionImpl) containerDefinition).setRuntimeSchema(true);
-						((PrismContainerDefinitionImpl) containerDefinition).setDynamic(true);
+						//((PrismContainerDefinitionImpl) containerDefinition).setRuntimeSchema(true);
+						((PrismContainerDefinitionImpl) containerDefinition).setDynamic(true);      // TODO is this ok?
 					}
 					((PrismContainerDefinitionImpl) containerDefinition).setInherited(particleInherited);
 					((ComplexTypeDefinitionImpl) ctd).add(containerDefinition);
@@ -878,8 +878,7 @@ class DomToSchemaPostProcessor {
 
 		SchemaDefinitionFactory definitionFactory = getDefinitionFactory();
 
-		Collection<? extends DisplayableValue<T>> allowedValues = parseEnumAllowedValues(typeName, ctd,
-				xsType);
+		Collection<? extends DisplayableValue<T>> allowedValues = parseEnumAllowedValues(typeName, ctd, xsType);
 
 		Object defaultValue = parseDefaultValue(elementParticle, typeName);
 
@@ -969,14 +968,11 @@ class DomToSchemaPostProcessor {
 			if (xsType.asSimpleType().isRestriction()) {
 				XSRestrictionSimpleType restriction = xsType.asSimpleType().asRestriction();
 				List<XSFacet> enumerations = restriction.getDeclaredFacets(XSFacet.FACET_ENUMERATION);
-				List<DisplayableValueImpl<T>> enumValues = new ArrayList<DisplayableValueImpl<T>>(
-						enumerations.size());
+				List<DisplayableValueImpl<T>> enumValues = new ArrayList<>(enumerations.size());
 				for (XSFacet facet : enumerations) {
 					String value = facet.getValue().value;
-					Element descriptionE = SchemaProcessorUtil.getAnnotationElement(facet.getAnnotation(),
-							SCHEMA_DOCUMENTATION);
-					Element appInfo = SchemaProcessorUtil.getAnnotationElement(facet.getAnnotation(),
-							SCHEMA_APP_INFO);
+					Element descriptionE = SchemaProcessorUtil.getAnnotationElement(facet.getAnnotation(), SCHEMA_DOCUMENTATION);
+					Element appInfo = SchemaProcessorUtil.getAnnotationElement(facet.getAnnotation(), SCHEMA_APP_INFO);
 					Element valueE = null;
 					if (appInfo != null) {
 						NodeList list = appInfo.getElementsByTagNameNS(
@@ -986,21 +982,20 @@ class DomToSchemaPostProcessor {
 							valueE = (Element) list.item(0);
 						}
 					}
-					String label = null;
+					String label;
 					if (valueE != null) {
 						label = valueE.getTextContent();
 					} else {
 						label = value;
 					}
-					DisplayableValueImpl<T> edv = null;
+					DisplayableValueImpl<T> edv;
 					Class compileTimeClass = prismContext.getSchemaRegistry().getCompileTimeClass(typeName);
 					if (ctd != null && !ctd.isRuntimeSchema() && compileTimeClass != null) {
 
 						String fieldName = null;
 						for (Field field : compileTimeClass.getDeclaredFields()) {
 							XmlEnumValue xmlEnumValue = field.getAnnotation(XmlEnumValue.class);
-							if (xmlEnumValue != null && xmlEnumValue.value() != null
-									&& xmlEnumValue.value().equals(value)) {
+							if (xmlEnumValue != null && xmlEnumValue.value().equals(value)) {
 								fieldName = field.getName();
 							}
 
@@ -1022,10 +1017,9 @@ class DomToSchemaPostProcessor {
 					enumValues.add(edv);
 
 				}
-				if (enumValues != null && !enumValues.isEmpty()) {
+				if (!enumValues.isEmpty()) {
 					return enumValues;
 				}
-
 			}
 		}
 		return null;

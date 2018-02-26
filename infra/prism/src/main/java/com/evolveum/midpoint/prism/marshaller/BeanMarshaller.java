@@ -257,9 +257,10 @@ public class BeanMarshaller {
 				}
 				XNode marshaled = marshallValue(valueToMarshall, fieldTypeName, isAttribute, ctx);
 				// TODO reconcile with setExplicitTypeDeclarationIfNeeded
+				// TODO reconcile with PrismMarshaller.addTypeDefinitionIfNeeded (MID-4482)
 				if (!getter.getReturnType().equals(valueToMarshall.getClass()) && getter.getReturnType().isAssignableFrom(valueToMarshall.getClass()) && !(valueToMarshall instanceof Enum)) {
 					TypeDefinition def = prismContext.getSchemaRegistry().findTypeDefinitionByCompileTimeClass(valueToMarshall.getClass(), TypeDefinition.class);
-					if (def != null) {
+					if (def != null && !def.isRuntimeSchema()) {
 						QName type = def.getTypeName();
 						marshaled.setTypeQName(type);
 						marshaled.setExplicitTypeDeclaration(true);
