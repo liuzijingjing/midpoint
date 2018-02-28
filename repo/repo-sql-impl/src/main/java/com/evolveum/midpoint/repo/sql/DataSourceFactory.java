@@ -84,6 +84,9 @@ public class DataSourceFactory {
         ds.setMinPoolSize(configuration.getMinPoolSize());
         ds.setMaxPoolSize(configuration.getMaxPoolSize());
         ds.setIdleConnectionTestPeriod(1800);
+        if (configuration.getMaxPoolSize() > 30) {
+            ds.setNumHelperThreads(10);
+        }
         ds.setConnectionTesterClassName(MidPointConnectionTester.class.getName());
         ds.setConnectionCustomizerClassName(MidPointConnectionCustomizer.class.getName());
 
